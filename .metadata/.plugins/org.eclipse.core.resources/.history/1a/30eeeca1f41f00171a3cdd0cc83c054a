@@ -1,0 +1,100 @@
+package textExcel;
+import java.util.*;
+// Update this file with your own code.
+
+public class Spreadsheet implements Grid
+{
+	private Cell[][]sheet = new Cell[20][12];
+	
+	public Spreadsheet(){
+		for(int i = 0; i < getRows(); i++){
+			for(int j = 0; j < getCols(); j++){
+				sheet[i][j] = new EmptyCell();
+			}
+		}
+	}
+	@Override
+	public String processCommand(String command)
+	{
+		String[] trueCommand = command.split(" ", 3);
+		if(command.contains("=")){				//test if inputing/changing values
+			String cellValue = trueCommand[2];
+			SpreadsheetLocation cellLocation = new SpreadsheetLocation(trueCommand[0].toUpperCase());
+			if (cellValue.charAt(0) == '(' && cellValue.charAt(cellValue.length()-1) == ')'){
+				sheet[cellLocation.getRow()][cellLocation.getCol()] = new FormulaCell(cellValue);		//add this later
+			}else if (cellValue.charAt(0) == '"' && cellValue.charAt(cellValue.length()-1) == '"'){
+				sheet[cellLocation.getRow()][cellLocation.getCol()] = new TextCell(cellValue.substring(1, cellValue.length()-1));	
+			}else if (cellValue.charAt(0) == '%'){
+				sheet[cellLocation.getRow()][cellLocation.getCol()] = new PercentCell(cellValue);
+			}else {
+			return getGridText();
+			}
+		}else if(trueCommand[0].toLowerCase().equals("clear")){		//for clearing a specific cell
+			if(trueCommand.length >= 1){
+				trueCommand[1] = trueCommand[1].toUpperCase();
+				SpreadsheetLocation loc= new SpreadsheetLocation(trueCommand[1]);
+				sheet[loc.getRow()][loc.getCol()]= new EmptyCell();
+			}else{							//for clearing the entire sheet
+				for(int i = 0; i < this.getRows(); i++){
+					for(int j = 0; j < this.getCols(); j++){
+						sheet[i][j] = new EmptyCell();
+					}
+				}
+			}
+			return getGridText();
+		}else{								//specific cell inspection
+		SpreadsheetLocation inspect = new SpreadsheetLocation(trueCommand[0]);
+		return sheet[inspect.getRow()][inspect.getCol()].toString();
+		}
+	}
+	public void createCell(String cellLocation, String value){
+	
+	}
+
+	@Override
+	public int getRows()
+	{
+		return sheet.length;
+	}
+
+	@Override
+	public int getCols()
+	{
+		return sheet[0].length;
+	}
+
+	@Override
+	public Cell getCell(Location loc)
+	{
+		int row = loc.getRow();
+		int cols = loc.getCol();
+		return(sheet[row][cols]);
+	}
+
+	@Override
+	public String getGridText()
+	{
+		String wholeSheet = "";							//initialize sheet for string and first header pipe
+		String header = "   |";
+		char col = 'A';
+		for(int i = 0; i <this.getCols(); i++){			//format for lettered columns
+			header += ((char)(col+i)) + "         |";
+		}
+		wholeSheet += header + "\n";									//moves to next line
+		String cell = "";
+		for(int i = 0; i < this.getRows(); i++){		//formats for different row numbers
+			if(i < 9){
+				cell = ((i + 1) + "  |");
+			} else {
+				cell = ((i + 1) + " |");
+			}
+			for(int j = 0; j < sheet[0].length; j++){
+				cell += sheet[i][j].abbreviatedCellText() + "|";
+			}
+			wholeSheet += cell + "\n";
+		}
+		return wholeSheet;
+	}	
+}
+
+

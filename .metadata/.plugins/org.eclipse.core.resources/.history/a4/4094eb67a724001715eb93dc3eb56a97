@@ -1,0 +1,39 @@
+package textExcel;
+
+
+public class FormulaCell extends RealCell {
+	private String formulaCell;
+	
+	public FormulaCell (String cellInput) {
+		super(cellInput);
+		formulaCell = cellInput;
+	}
+	
+	public double getDoubleValue (String input) {
+		String[] formulaParse = formulaCell.split(" ");
+		double answer = Double.parseDouble(formulaParse[1]);
+		for (int i = 2; i < formulaParse.length-1; i += 2){
+			double calculate = Double.parseDouble(formulaParse[i+1]);
+			if (formulaParse[i].equals("-")){
+				answer -= calculate;
+			}else if (formulaParse[i].equals("+")){
+				answer += calculate;
+			}else if (formulaParse[i].equals("*")){
+				answer *= calculate;
+			}else if (formulaParse[i].equals("/")){
+				answer /=calculate;
+			}
+		}
+		return answer;
+	}
+	
+	public String abbreviatedCellText(){
+		return getDoubleValue(formulaCell)+"                      ".substring(0,10);
+	}
+	
+	public String fullCellText() {
+		return super.fullCellText();
+	}
+}
+	
+	
